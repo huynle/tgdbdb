@@ -18,15 +18,18 @@ set_title(gdb_tty, 'gdb')
 dashboard_pane, dashboard_tty = tmux('split-window', '-d', '-h', '-P', '-F', '#{pane_id},#{pane_tty}', NULLPROG).strip().split(',')
 sp.check_call(['stty', '--file', dashboard_tty, '-echo'])
 set_title(dashboard_tty, 'dashboard')
-gdb.execute(f'dashboard -output {dashboard_tty}')
+gdb.execute('dashboard -output {0}'.format(dashboard_tty))
 
 app_pane, app_tty = tmux('split-window', '-d', '-v', '-P', '-F', '#{pane_id},#{pane_tty}', NULLPROG).strip().split(',')
 set_title(app_tty, 'inferior')
-gdb.execute(f'set inferior-tty {app_tty}')
+gdb.execute('set inferior-tty {0}'.format(app_tty))
 
 end
 
-dashboard -layout source assembly registers stack
+# dashboard -layout source assembly registers stack variables memory
+alias db=dashboard
+
+dashboard -layout source stack variables threads expressions
 dashboard -enabled on
 dashboard -style syntax_highlighting 'monokai'
 
