@@ -5,10 +5,20 @@ if [ -f "./gdbinit" ]; then
 	ARGS=$ARGS\ -x\ ./gdbinit
 fi
 
+# enabling newer version of gdb for debugging
+# only on redhat linux
+rhel_scl="source scl_source enable devtoolset-9"
+# unset it
+rhel_scl=""
+
 if [ -z "$TMUX" ]
 then
-    exec_cmd="exec tmux new -n GDB"
+  exec_cmd="exec tmux new -n GDB -e LD_LIBRARY_PATH=$LD_LIBRARY_PATH"
 else
-    exec_cmd="exec tmux new-window -n GDB"
+  # setting the library path just for gdb to properly execute the program
+  exec_cmd="exec tmux new-window -n GDB -e LD_LIBRARY_PATH=$LD_LIBRARY_PATH"
 fi
-$exec_cmd sh -c "gdb -x '~/.tgdbinit' $ARGS ${@@Q} ; tmux kill-window -t \$TMUX_PANE"
+
+# if need to link libraries
+# $exec_cmd sh -c "LD_LIBRARY_PATH=../ gdb -x '~/.tgdbinit' $ARGS ${@} ; tmux kill-window
+echo $$; $exec_cmd sh -c "$rhel_scl && gdb -x '~/.tgdbinit' $ARGS ${@}; tmux kill-window"
